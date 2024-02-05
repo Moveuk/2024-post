@@ -9,6 +9,7 @@ import xyz.moveuk.post.domain.member.repository.MemberRepository
 import xyz.moveuk.post.global.exception.RestApiException
 import xyz.moveuk.post.global.exception.dto.CommonErrorCode
 import xyz.moveuk.post.global.exception.dto.MemberErrorCode
+import xyz.moveuk.post.infra.security.UserPrincipal
 import xyz.moveuk.post.infra.security.jwt.JwtPlugin
 
 @Service
@@ -43,9 +44,8 @@ class MemberService(
         )
     }
 
-    fun delete(memberId: Long): String {
-        val findMember = memberRepository.findByIdOrNull(memberId)
-        findMember ?: throw RuntimeException()
+    fun delete(userPrincipal: UserPrincipal): String {
+        val findMember = memberRepository.findByIdOrNull(userPrincipal.id) ?: throw RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND)
         memberRepository.delete(findMember)
 
         return "회원 탈퇴 성공"

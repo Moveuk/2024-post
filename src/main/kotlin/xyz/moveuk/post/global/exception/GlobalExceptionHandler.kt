@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.validation.BindException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -36,9 +37,15 @@ class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
         return handleExceptionInternal(errorCode, e)
     }
 
+    @ExceptionHandler(AccessDeniedException::class)
+    fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ErrorResponse> {
+        kLogger.warn { "${CommonErrorCode.UNAUTHORIZED.code()}: ${CommonErrorCode.UNAUTHORIZED.message()}" }
+        return handleExceptionInternal(CommonErrorCode.UNAUTHORIZED)
+    }
+
     @ExceptionHandler(Exception::class)
     fun handleAllException(e: Exception?): ResponseEntity<ErrorResponse> {
-        kLogger.warn(e) { "${"handleAllException"}, $e" }
+        kLogger.error(e) { "GlobalExceptionHandler.handleAllException: $e" }
         val errorCode: ErrorCode = CommonErrorCode.INTERNAL_SERVER_ERROR
         return handleExceptionInternal(errorCode)
     }
