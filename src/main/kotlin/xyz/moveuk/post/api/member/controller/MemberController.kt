@@ -2,6 +2,7 @@ package xyz.moveuk.post.api.member.controller
 
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.*
+import xyz.moveuk.post.api.member.dto.LoginRequest
 import xyz.moveuk.post.api.member.dto.SignupRequest
 import xyz.moveuk.post.application.member.service.MemberService
 
@@ -13,6 +14,10 @@ class MemberController(
     @PostMapping("/signup")
     fun signup(@Valid @RequestBody signupRequest: SignupRequest): String {
         return memberService.signup(signupRequest)
+    }
+    @PostMapping("/login")
+    fun signup(@Valid @RequestBody loginRequest: LoginRequest): String {
+        return memberService.login(loginRequest)
     }
     @DeleteMapping()
     fun delete(@RequestParam memberId: Long): String {
