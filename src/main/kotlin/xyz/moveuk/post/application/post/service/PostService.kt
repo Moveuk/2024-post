@@ -4,9 +4,11 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import xyz.moveuk.post.api.post.dto.CreatePostRequest
 import xyz.moveuk.post.api.post.dto.CreatePostResponse
+import xyz.moveuk.post.api.post.dto.PostSearchCondition
 import xyz.moveuk.post.domain.image.model.Image
 import xyz.moveuk.post.domain.image.repository.ImageRepository
 import xyz.moveuk.post.domain.member.repository.MemberRepository
+import xyz.moveuk.post.domain.post.dto.PostListDto
 import xyz.moveuk.post.domain.post.repository.PostRepository
 import xyz.moveuk.post.global.exception.RestApiException
 import xyz.moveuk.post.global.exception.dto.CommonErrorCode
@@ -20,6 +22,10 @@ class PostService(
     private val postRepository: PostRepository,
     private val s3ClientService: S3ClientService
 ) {
+    fun getAllPosts(condition: PostSearchCondition): MutableList<PostListDto?> {
+        return postRepository.searchByWhere(condition)
+    }
+
     fun createPost(req: CreatePostRequest, userPrincipal: UserPrincipal): CreatePostResponse {
         val findMember = memberRepository.findByIdOrNull(userPrincipal.id)
             ?: throw RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND)

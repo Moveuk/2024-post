@@ -6,13 +6,12 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import xyz.moveuk.post.api.post.dto.CreatePostRequest
 import xyz.moveuk.post.api.post.dto.CreatePostResponse
+import xyz.moveuk.post.api.post.dto.PostSearchCondition
 import xyz.moveuk.post.application.post.service.PostService
+import xyz.moveuk.post.domain.post.dto.PostListDto
 import xyz.moveuk.post.infra.security.UserPrincipal
 
 @RestController
@@ -20,10 +19,20 @@ import xyz.moveuk.post.infra.security.UserPrincipal
 class PostController(
     private val postService: PostService
 ) {
+    @GetMapping
+    fun getPosts(
+        condition: PostSearchCondition
+    ): ResponseEntity<MutableList<PostListDto?>> {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(postService.getAllPosts(condition))
+    }
+
     @PreAuthorize("hasRole('MEMBER') or hasRole('ADMIN')")
     @PostMapping(
         consumes = [MediaType.MULTIPART_FORM_DATA_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE])
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     fun createPost(
         @Valid @ModelAttribute createPostRequest: CreatePostRequest,
         @AuthenticationPrincipal userPrincipal: UserPrincipal
@@ -35,4 +44,5 @@ class PostController(
                     .body(it)
             }
     }
+
 }
