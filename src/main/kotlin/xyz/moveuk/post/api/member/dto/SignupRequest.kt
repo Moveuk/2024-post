@@ -4,6 +4,8 @@ import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import org.springframework.validation.annotation.Validated
 import xyz.moveuk.post.api.valid.Password
+import xyz.moveuk.post.domain.member.model.MemberEntity
+import xyz.moveuk.post.domain.member.model.MemberRole
 
 @Validated
 data class SignupRequest(
@@ -16,4 +18,11 @@ data class SignupRequest(
     val passwordCheck: String,
     @field: NotBlank(message = "닉네임을 입력해주세요")
     val nickname: String
-)
+) {
+    fun toMemberEntity(): MemberEntity = MemberEntity(
+        email = email,
+        nickname = nickname,
+        rawPassword = password,
+        role = MemberRole.MEMBER
+    )
+}

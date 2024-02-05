@@ -1,10 +1,7 @@
 package xyz.moveuk.post.api.member.controller
 
 import jakarta.validation.Valid
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import xyz.moveuk.post.api.member.dto.SignupRequest
 import xyz.moveuk.post.application.member.service.MemberService
 
@@ -16,6 +13,10 @@ class MemberController(
     @PostMapping("/signup")
     fun signup(@Valid @RequestBody signupRequest: SignupRequest): String {
         return memberService.signup(signupRequest)
+    }
+    @DeleteMapping()
+    fun delete(@RequestParam memberId: Long): String {
+        return memberService.delete(memberId)
     }
 
 }

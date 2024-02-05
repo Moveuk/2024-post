@@ -1,16 +1,21 @@
 package xyz.moveuk.post.domain.member.model
 
 import jakarta.persistence.*
-import xyz.moveuk.post.global.entity.BaseTimeEntity
+import org.hibernate.annotations.SQLDelete
+import org.hibernate.annotations.SQLRestriction
+import org.springframework.security.crypto.password.PasswordEncoder
+import xyz.moveuk.post.global.entity.BaseEntity
 
 @Entity
 @Table(name = "members")
+@SQLDelete(sql = "UPDATE members SET is_deleted = true WHERE id = ?")
+@SQLRestriction(value = "is_deleted = false")
 class MemberEntity(
     @Column(name = "email", nullable = false, unique = true)
     val email: String,
 
-    @Column(name = "password", nullable = false)
-    var password: String,
+    @Transient
+    var rawPassword: String,
 
     @Column(name = "nickname", nullable = false)
     var nickname: String,
@@ -18,30 +23,22 @@ class MemberEntity(
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     var role: MemberRole,
-) : BaseTimeEntity() {
+) : BaseEntity() {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
+
+    @Column(name = "password", nullable = false)
+    var password: String? = null
 
     fun update(nickname: String, updatedPassword: String) {
         this.nickname = nickname
         this.password = updatedPassword
     }
 
-    companion object {
-        fun ofMember(email: String, nickname: String, password: String): MemberEntity = MemberEntity(
-            email = email,
-            nickname = nickname,
-            password = password,
-            role = MemberRole.MEMBER,
-        )
-
-        fun ofAdmin(email: String, nickname: String, password: String): MemberEntity = MemberEntity(
-            email = email,
-            nickname = nickname,
-            password = password,
-            role = MemberRole.ADMIN,
-        )
+    fun encodePassword(encoder: PasswordEncoder): MemberEntity {
+        this.password = encoder.encode(rawPassword)
+        return this
     }
 }
