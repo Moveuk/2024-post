@@ -4,7 +4,9 @@ import com.querydsl.core.types.dsl.BooleanExpression
 import org.springframework.stereotype.Repository
 import org.springframework.util.StringUtils
 import xyz.moveuk.post.api.post.dto.PostSearchCondition
+import xyz.moveuk.post.domain.image.model.QImage
 import xyz.moveuk.post.domain.member.model.QMemberEntity
+import xyz.moveuk.post.domain.post.dto.PostDto
 import xyz.moveuk.post.domain.post.dto.PostListDto
 import xyz.moveuk.post.domain.post.dto.QPostListDto
 import xyz.moveuk.post.domain.post.model.QPost
@@ -15,6 +17,38 @@ import xyz.moveuk.post.infra.querydsl.QueryDslSupport
 class PostQueryDslRepositoryImpl : PostQueryDslRepository, QueryDslSupport() {
     private val post = QPost.post
     private val member = QMemberEntity.memberEntity
+    private val image = QImage.image
+
+    override fun findFetchJoinPostById(postId: Long): PostDto? {
+        return queryFactory
+            .selectFrom(post)
+            .leftJoin(post.member, member)
+            .fetchJoin()
+            .leftJoin(post.images, image)
+            .where(post.id.eq(postId))
+            .fetchOne().let {
+                PostDto.from(it)
+            }
+    }
+
+    override fun getRecentPosts(recentPostIds: List<Long>): MutableList<PostListDto?> {
+        return queryFactory
+            .select(
+                QPostListDto(
+                    post.id.`as`("postId"),
+                    post.title,
+                    post.member.id.`as`("memberId"),
+                    post.member.nickname,
+                    post.createdAt
+                )
+            )
+            .from(post)
+            .leftJoin(post.member, member)
+            .where(
+                post.id.`in`(recentPostIds)
+            )
+            .fetch()
+    }
 
     override fun searchByWhere(condition: PostSearchCondition): MutableList<PostListDto?> {
         return queryFactory
