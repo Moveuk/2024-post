@@ -12,7 +12,13 @@ data class PostDto @QueryProjection constructor(
     val nickname: String,
     val images: List<ImageDto>,
     val createdAt: LocalDateTime,
+    var hit: Long = 0,
 ) {
+    fun hit(postHit: Long): PostDto {
+        this.hit = postHit
+        return this
+    }
+
     companion object {
         fun from(post: Post?): PostDto? {
             return if (post != null) {

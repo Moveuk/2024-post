@@ -24,15 +24,28 @@ class PostService(
     private val s3ClientService: S3ClientService
 ) {
     fun getAllPosts(condition: PostSearchCondition): MutableList<PostListDto?> {
-        return postRepository.searchByWhere(condition)
+        return postRepository.searchByWhere(condition).also { searchByWhere ->
+            //조회수 넣어주기
+            if (searchByWhere.isNotEmpty()) {
+                postRepository.getHitsByInPostId(searchByWhere.map { it!!.postId })
+                    .forEachIndexed { index, postHit ->
+                        searchByWhere[index]!!.hit(postHit)
+                    }
+            }
+        }
     }
 
     fun getPost(authenticatedMemberId: Long, postId: Long): PostDto {
         //최근 본 글에 추가
         postRepository.saveRecentPostIds(authenticatedMemberId, postId)
 
-        return postRepository.findFetchJoinPostById(postId)
+        //조회수 업
+        val postHit = postRepository.incrementHit(authenticatedMemberId, postId)
+
+        val findPost = postRepository.findFetchJoinPostById(postId)
             ?: throw RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND)
+
+        return findPost.hit(postHit)
     }
 
     fun getRecentPosts(authenticatedMemberId: Long): MutableList<PostListDto?> {
@@ -44,9 +57,16 @@ class PostService(
         //querydsl에서 ORDER BY FIND_IN_SET()을 지원하지 않아 순서가 다르기 떄문에 application 계층에서 정렬해주기로 결정
         val orderedRecentPosts = mutableListOf<PostListDto?>()
 
-        recentPostIds.forEachIndexed {
-                index, postId ->
+        recentPostIds.forEachIndexed { index, postId ->
             orderedRecentPosts.add(index, recentPosts.first { it?.postId == postId })
+        }
+
+        //조회수 넣어주기
+        if (orderedRecentPosts.isNotEmpty()) {
+            postRepository.getHitsByInPostId(recentPostIds)
+                .forEachIndexed { index, postHit ->
+                    orderedRecentPosts[index]!!.hit(postHit)
+                }
         }
 
         return orderedRecentPosts

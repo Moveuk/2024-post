@@ -9,4 +9,10 @@ data class PostListDto @QueryProjection constructor(
     val memberId: Long,
     val nickname: String,
     val createdAt: LocalDateTime,
-)
+) {
+    var hit: Long = 0
+    fun hit(postHit: Long): PostListDto {
+        this.hit = postHit
+        return this
+    }
+}
