@@ -18,8 +18,9 @@ class MemberController(
     private val memberService: MemberService
 ) {
     @PostMapping("/signup")
-    fun signup(@Valid @RequestBody signupRequest: SignupRequest): ResponseEntity<String> {
-        return ResponseEntity.status(HttpStatus.OK).body(memberService.signup(signupRequest))
+    fun signup(@Valid @RequestBody signupRequest: SignupRequest): ResponseEntity<Unit> {
+        memberService.signup(signupRequest)
+        return ResponseEntity.ok().build()
     }
 
     @PostMapping("/login")
@@ -33,8 +34,9 @@ class MemberController(
     @DeleteMapping()
     fun delete(
         @AuthenticationPrincipal userPrincipal: UserPrincipal
-    ): ResponseEntity<String> {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(memberService.delete(userPrincipal))
+    ): ResponseEntity<Unit> {
+        memberService.delete(userPrincipal)
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
     }
 
 }

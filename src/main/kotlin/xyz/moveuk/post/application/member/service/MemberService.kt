@@ -18,7 +18,7 @@ class MemberService(
     private val passwordEncoder: PasswordEncoder,
     private val jwtPlugin: JwtPlugin,
 ) {
-    fun signup(signupRequest: SignupRequest): String {
+    fun signup(signupRequest: SignupRequest) {
         // 비밀번호와 비밀번호 체크 검증 check assert
         check(signupRequest.password == signupRequest.passwordCheck) { throw RestApiException(MemberErrorCode.PASSWORD_VERIFICATION_MISMATCH) }
         // 비밀번호에 닉네임이 들어가면 예외 처리
@@ -29,7 +29,6 @@ class MemberService(
         signupRequest.toMemberEntity()
             .encodePassword(passwordEncoder)
             .let { memberRepository.save(it) }
-        return "회원가입 성공"
     }
 
     fun login(loginRequest: LoginRequest): String {
@@ -44,10 +43,8 @@ class MemberService(
         )
     }
 
-    fun delete(userPrincipal: UserPrincipal): String {
+    fun delete(userPrincipal: UserPrincipal) {
         val findMember = memberRepository.findByIdOrNull(userPrincipal.id) ?: throw RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND)
         memberRepository.delete(findMember)
-
-        return "회원 탈퇴 성공"
     }
 }

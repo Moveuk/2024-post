@@ -10,9 +10,9 @@ import java.util.*
 
 
 @Repository
-class PostRedisRepositoryImpl(
+class PostFindRecentAndHitRepositoryImpl(
     private val redisTemplate: RedisTemplate<String, String>
-) : PostRedisRepository {
+) : PostFindRecentAndHitRepository {
     lateinit var valueOperations: ValueOperations<String, String>
     lateinit var listOperations: ListOperations<String, String>
     lateinit var setOperations: SetOperations<String, String>
@@ -43,7 +43,6 @@ class PostRedisRepositoryImpl(
     }
 
     override fun incrementHit(authenticatedMemberId: Long, postId: Long): Long {
-        //TODO: 확장 가능하지 않음. POST의 경우에만 되고 다른 서비스 추가시 조회수 가능을 공유하지 않는가에 대한 고민 필요.
         val postKey = "$POST_HIT_KEY$postId"
         val memberKey = "$POST_HIT_MEMBER_KEY$postId"
         //금일 조회수 올린 사람 체크
