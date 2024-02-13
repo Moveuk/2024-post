@@ -24,6 +24,8 @@
 9. 게시물 조회시 조회수 확인 가능하도록 처리
    - redis 사용
    - 추 후 스케쥴러로 주기적으로 redis의 조회수를 db에 flush 하도록 변경 예정
+10. 테스트 코드 작성
+   - repository 단위 테스트: searchByWhere 조건 테스트
 
 ## ⚙️ 라이브러리
 - Spring Web
